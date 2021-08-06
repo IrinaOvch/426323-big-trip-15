@@ -1,4 +1,4 @@
-import {getRandomInteger, getRandomElements} from './../utils.js';
+import {getRandomInteger, getRandomElements, generateOffers} from './../utils.js';
 import dayjs from 'dayjs';
 
 const generateType = () => {
@@ -36,9 +36,9 @@ const generateDestination = () => {
   return destinations[randomIndex];
 };
 
-const generateDate = () => ({
-  dateFrom: dayjs().add(getRandomInteger(0, 30), 'day').add(getRandomInteger(0, 24), 'hour').toDate(),
-  dateTo: dayjs().add(getRandomInteger(30, 60), 'day').add(getRandomInteger(0, 24), 'hour').toDate(),
+const generateDate = (i) => ({
+  dateFrom: dayjs().add(getRandomInteger(i*10, (i+1)*10), 'day').add(getRandomInteger(0, 24), 'hour').toDate(),
+  dateTo: dayjs().add(getRandomInteger((i+1)*10, (i+2)*10), 'day').add(getRandomInteger(0, 24), 'hour').toDate(),
 });
 
 
@@ -53,132 +53,17 @@ const generateDescription = () => {
 
 const generatePhotos = () => new Array(getRandomInteger(1, 10)).fill().map(() => `http://picsum.photos/248/152?r=${Math.random()}`);
 
-const generateOptions = (type) => {
-  const offers =  {
-    'Taxi': [
-      {
-        name: 'Choose the radio station',
-        price: 10,
-      },
-      {
-        name: 'Drive quickly, Im in a hurry',
-        price: 50,
-      },
-      {
-        name: 'Turn on AC',
-        price: 20,
-      },
-    ],
-    'Bus': [
-      {
-        name: 'Sit next to the driver',
-        price: 5,
-      },
-      {
-        name: 'Turn on AC',
-        price: 10,
-      },
-      {
-        name: 'Choose seat',
-        price: 10,
-      },
-    ],
-    'Train': [
-      {
-        name: 'Choose seat',
-        price: 20,
-      },
-      {
-        name: 'Book a taxi at the arrival point',
-        price: 110,
-      },
-      {
-        name: 'Order a breakfast',
-        price: 80,
-      },
-    ],
-    'Ship': [
-      {
-        name: 'Choose seat',
-        price: 20,
-      },
-      {
-        name: 'Choose meal',
-        price: 35,
-      },
-    ],
-    'Drive': [
-      {
-        name: 'Choose comfort class',
-        price: 110,
-      },
-      {
-        name: 'Choose business class',
-        price: 180,
-      },
-    ],
-    'Flight': [
-      {
-        name: 'Choose business class',
-        price: 150,
-      },
-      {
-        name: 'Choose seat',
-        price: 25,
-      },
-      {
-        name: 'Choose meal',
-        price: 15,
-      },
-    ],
-    'Check-in': [
-      {
-        name: 'Choose the time of check-in',
-        price: 70,
-      },
-      {
-        name: 'Skip the queue',
-        price: 150,
-      },
-    ],
-    'Sightseeing': [
-      {
-        name: 'Get a personal guide',
-        price: 1000,
-      },
-      {
-        name: 'Skip the queue',
-        price: 150,
-      },
-    ],
-    'Restaurant': [
-      {
-        name: 'Book a table',
-        price: 10,
-      },
-      {
-        name: 'Choose live music',
-        price: 150,
-      },
-      {
-        name: 'Choose VIP area',
-        price: 70,
-      },
-    ],
-  };
+const generateTripPoint = (i) => {
 
-  return offers[type];
-};
-
-const generateTripPoint = () => {
-
-  const {dateFrom, dateTo} = generateDate();
+  const {dateFrom, dateTo} = generateDate(i);
   const pointType = generateType();
+  const availableOffers = generateOffers(pointType);
 
   return {
     type: pointType,
     destination: generateDestination(),
-    offers: generateOptions(pointType),
+    offers: getRandomElements(availableOffers, getRandomInteger(0, availableOffers.length)),
+    id: i,
     dateFrom,
     dateTo,
     price: getRandomInteger(0, 2000),
@@ -190,6 +75,6 @@ const generateTripPoint = () => {
   };
 };
 
-const generateTripPoints = (amount) => new Array(amount).fill().map(() => generateTripPoint());
+const generateTripPoints = (amount) => new Array(amount).fill().map((_,i) => generateTripPoint(i));
 
 export {generateTripPoints};
