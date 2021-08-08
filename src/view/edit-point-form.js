@@ -1,12 +1,11 @@
 import dayjs from 'dayjs';
-import {generateOffers} from './../utils.js';
+import {generateOffers, createElement} from './../utils.js';
 
 const createOffersList = (point) => {
   const offers = generateOffers(point.type);
   const pointOffers = point.offers.map((offer) => offer.name);
 
-  return offers.map((offer, i) => `
-    <div class="event__offer-selector">
+  return offers.map((offer, i) => `<div class="event__offer-selector">
       <input ${pointOffers.includes(offer.name) ? 'checked' : ''} class="event__offer-checkbox  visually-hidden" id="event-offer-${i}" type="checkbox" name="event-offer-luggage">
       <label class="event__offer-label" for="event-offer-${i}">
         <span class="event__offer-title">${offer.name}</span>
@@ -17,8 +16,7 @@ const createOffersList = (point) => {
 };
 
 
-const createEditPointFormTemplate = (point) => (`
-  <li class="trip-events__item">
+const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
@@ -139,4 +137,25 @@ const createEditPointFormTemplate = (point) => (`
     </form>
   </li>`);
 
-export {createEditPointFormTemplate};
+export default class EitPointForm {
+  constructor(point) {
+    this._element = null;
+    this._point = point;
+  }
+
+  getTemplate() {
+    return createEditPointFormTemplate(this._point);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

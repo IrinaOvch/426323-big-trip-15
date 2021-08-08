@@ -1,3 +1,5 @@
+import {createElement} from './../utils.js';
+
 const createAddNewPointFormTemplate = () => (
   `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -153,4 +155,24 @@ const createAddNewPointFormTemplate = () => (
   </li>`
 );
 
-export {createAddNewPointFormTemplate};
+export default class AddNewPointForm {
+  constructor() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createAddNewPointFormTemplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

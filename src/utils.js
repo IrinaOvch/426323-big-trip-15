@@ -124,4 +124,26 @@ const generateOffers = (type) => {
   return offers[type];
 };
 
-export {getRandomInteger, getRandomElements, generateOffers};
+const createElement = (template) => {
+  const newElement = document.createElement('div');
+  newElement.innerHTML = template;
+  return newElement.firstChild;
+};
+
+const RenderPosition = {
+  AFTERBEGIN: 'afterbegin',
+  BEFOREEND: 'beforeend',
+};
+
+const renderElement = (container, element, place) => {
+  switch (place) {
+    case RenderPosition.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case RenderPosition.BEFOREEND:
+      container.append(element);
+      break;
+  }
+};
+
+export {getRandomInteger, getRandomElements, generateOffers, createElement, renderElement, RenderPosition};
