@@ -5,8 +5,9 @@ import SiteSortingView from './view/site-sorting.js';
 import EditPointFormView from './view/edit-point-form.js';
 import PointsListView from './view/points-list.js';
 import TripPointView from './view/trip-point.js';
+import EmptyPointsListView from './view/empty-points-list-message.js';
 import {generateTripPoints} from './mock/trip-point.js';
-import {renderElement, RenderPosition} from './utils.js';
+import {renderElement, RenderPosition, isEscPressed} from './utils.js';
 // import {createAddNewPointFormTemplate} from './view/add-new-point-form.js';
 
 const POINTS_AMOUNT = 20;
@@ -21,7 +22,10 @@ const mainContentContainer = document.querySelector('.trip-events');
 renderElement(siteNavigationContainer, new SiteMenuView().getElement(), RenderPosition.BEFOREEND);
 renderElement(mainInfoContainer, new TripInfoView(points).getElement(), RenderPosition.AFTERBEGIN);
 renderElement(filtersContainer, new SiteFiltersView().getElement(), RenderPosition.BEFOREEND);
-renderElement(mainContentContainer, new SiteSortingView().getElement(), RenderPosition.BEFOREEND);
+
+if (points.length > 0) {
+  renderElement(mainContentContainer, new SiteSortingView().getElement(), RenderPosition.BEFOREEND);
+}
 
 const pointsListComponent = new PointsListView();
 
@@ -38,8 +42,21 @@ const renderTripPoint = (pointsListElement, point) => {
     pointsListElement.replaceChild(tripPointEditComponent.getElement(), tripPointComponent.getElement());
   };
 
+  const onEscKeyDown = (evt) => {
+    if (isEscPressed(evt)) {
+      evt.preventDefault();
+      replaceFormToCard();
+    }
+    document.removeEventListener('keydown', onEscKeyDown);
+  };
+
   tripPointComponent.getElement().querySelector('.event__rollup-btn').addEventListener('click', () => {
     replaceCardToForm();
+    document.addEventListener('keydown', onEscKeyDown);
+  });
+
+  tripPointEditComponent.getElement().querySelector('.event__rollup-btn').addEventListener('click', () => {
+    replaceFormToCard();
   });
 
   tripPointEditComponent.getElement().querySelector('.event__rollup-btn').addEventListener('click', () => {
@@ -54,7 +71,9 @@ const renderTripPoint = (pointsListElement, point) => {
   renderElement(pointsListElement, tripPointComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
-
-renderElement(mainContentContainer, pointsListComponent.getElement(), RenderPosition.BEFOREEND);
-
-points.slice(1).forEach((_, i) => renderTripPoint(pointsListComponent.getElement(), points[i], i));
+if (points.length > 0) {
+  renderElement(mainContentContainer, pointsListComponent.getElement(), RenderPosition.BEFOREEND);
+  points.slice(1).forEach((_, i) => renderTripPoint(pointsListComponent.getElement(), points[i], i));
+} else {
+  renderElement(mainContentContainer, new EmptyPointsListView().getElement() , RenderPosition.BEFOREEND);
+}

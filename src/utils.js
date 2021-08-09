@@ -146,4 +146,6 @@ const renderElement = (container, element, place) => {
   }
 };
 
-export {getRandomInteger, getRandomElements, generateOffers, createElement, renderElement, RenderPosition};
+const isEscPressed = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
+
+export {getRandomInteger, getRandomElements, generateOffers, createElement, renderElement, RenderPosition, isEscPressed};
