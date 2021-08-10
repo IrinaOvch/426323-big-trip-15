@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
-import {generateOffers, createElement} from './../utils.js';
+import {generateOffers} from './../utils/trip-point.js';
+import AbstractView from './abstract.js';
 
 const createOffersList = (point) => {
   const offers = generateOffers(point.type);
@@ -137,25 +138,35 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
     </form>
   </li>`);
 
-export default class EitPointForm {
+export default class EitPointForm extends AbstractView {
   constructor(point) {
-    this._element = null;
+    super();
     this._point = point;
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._editClickHandler = this._editClickHandler.bind(this);
+  }
+
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  }
+
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  }
+
+  _editClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
+  }
+
+  setEditClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
   }
 
   getTemplate() {
     return createEditPointFormTemplate(this._point);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

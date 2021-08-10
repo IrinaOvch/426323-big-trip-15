@@ -1,12 +1,3 @@
-const getRandomInteger = (a = 0, b = 1) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a, b));
-
-  return Math.floor(lower + Math.random() * (upper - lower + 1));
-};
-
-const getRandomElements = (array, amount) => array.slice().sort(() => 0.5 - Math.random()).slice(0, amount);
-
 const generateOffers = (type) => {
   const offers =  {
     'Taxi': [
@@ -124,28 +115,4 @@ const generateOffers = (type) => {
   return offers[type];
 };
 
-const createElement = (template) => {
-  const newElement = document.createElement('div');
-  newElement.innerHTML = template;
-  return newElement.firstChild;
-};
-
-const RenderPosition = {
-  AFTERBEGIN: 'afterbegin',
-  BEFOREEND: 'beforeend',
-};
-
-const renderElement = (container, element, place) => {
-  switch (place) {
-    case RenderPosition.AFTERBEGIN:
-      container.prepend(element);
-      break;
-    case RenderPosition.BEFOREEND:
-      container.append(element);
-      break;
-  }
-};
-
-const isEscPressed = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
-
-export {getRandomInteger, getRandomElements, generateOffers, createElement, renderElement, RenderPosition, isEscPressed};
+export {generateOffers};
