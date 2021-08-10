@@ -1,4 +1,5 @@
-import {getRandomInteger, getRandomElements, generateOffers} from './../utils.js';
+import {getRandomInteger, getRandomElements} from './../utils/common.js';
+import {generateOffers} from './../utils/trip-point.js';
 import dayjs from 'dayjs';
 
 const generateType = () => {

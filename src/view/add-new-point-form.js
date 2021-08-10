@@ -1,4 +1,4 @@
-import {createElement} from './../utils.js';
+import AbstractView from './abstract.js';
 
 const createAddNewPointFormTemplate = () => (
   `<li class="trip-events__item">
@@ -155,24 +155,8 @@ const createAddNewPointFormTemplate = () => (
   </li>`
 );
 
-export default class AddNewPointForm {
-  constructor() {
-    this._element = null;
-  }
-
+export default class AddNewPointForm extends AbstractView {
   getTemplate() {
     return createAddNewPointFormTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
