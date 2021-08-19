@@ -48,4 +48,13 @@ const render = (container, element, place) => {
   }
 };
 
-export {createElement, RenderPosition, render, replace};
+const remove = (component) => {
+  if (!(component instanceof Abstract)) {
+    throw new Error('Can remove only components');
+  }
+
+  component.getElement().remove();
+  component.removeElement();
+};
+
+export {createElement, RenderPosition, render, replace, remove};
