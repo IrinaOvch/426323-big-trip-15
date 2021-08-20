@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 const generateOffers = (type) => {
   const offers =  {
     'Taxi': [
@@ -115,4 +117,14 @@ const generateOffers = (type) => {
   return offers[type];
 };
 
-export {generateOffers};
+const sortPointsByDate = (pointA, pointB) => dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
+
+const sortPointsByDuration = (pointA, pointB) => {
+  const pointADuration = dayjs(pointA.dateFrom).diff(dayjs(pointA.dateTo));
+  const pointBDuration = dayjs(pointB.dateFrom).diff(dayjs(pointB.dateTo));
+  return pointADuration - pointBDuration;
+};
+
+const sortPointsByPrice = (pointA, pointB) => pointB.price - pointA.price;
+
+export {generateOffers, sortPointsByDate, sortPointsByDuration, sortPointsByPrice};

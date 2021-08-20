@@ -4,11 +4,14 @@ import EmptyPointsListView from '../view/empty-points-list-message.js';
 import SiteSortingView from '../view/site-sorting.js';
 import TripPointPresenter from './trip-point.js';
 import {updateItem} from '../utils/common.js';
+import {SortType} from '../const.js';
+import {sortPointsByDate, sortPointsByDuration, sortPointsByPrice} from '../utils/trip-point.js';
 
 export default class Trip {
   constructor(mainContentContainer) {
     this._mainContentContainer = mainContentContainer;
     this._tripPointPresenter = new Map();
+    this._currentSortType = SortType.DEFAULT;
 
     this._pointsListComponent = new PointsListView();
     this._noPointsComponent = new EmptyPointsListView();
@@ -16,11 +19,11 @@ export default class Trip {
 
     this._handleTripPointChange = this._handleTripPointChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
   }
 
   init(points) {
     this._tripPoints = points.slice();
-
     this._renderTrip();
   }
 
@@ -30,6 +33,7 @@ export default class Trip {
 
   _renderSort() {
     render(this._mainContentContainer, this._sortComponent, RenderPosition.BEFOREEND);
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
 
   _renderPointsList() {
@@ -61,6 +65,31 @@ export default class Trip {
     this._tripPointPresenter.get(updatedPoint.id).init(updatedPoint);
   }
 
+  _sortTasks(sortType) {
+    switch(sortType) {
+      case SortType.TIME:
+        this._tripPoints.sort(sortPointsByDuration);
+        break;
+      case SortType.PRICE:
+        this._tripPoints.sort(sortPointsByPrice);
+        break;
+      default:
+        this._tripPoints.sort(sortPointsByDate);
+    }
+
+    this._currentSortType = sortType;
+    this._clearPointsList();
+    this._renderPointsList();
+  }
+
+  _handleSortTypeChange(sortType) {
+    if (this._currentSortType === sortType) {
+      return;
+    }
+
+    this._sortTasks(sortType);
+  }
+
   _renderTrip() {
     if (this._tripPoints.length > 0) {
       this._renderSort();
@@ -68,5 +97,6 @@ export default class Trip {
     } else {
       this._renderNoPoints();
     }
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
 }
