@@ -78,8 +78,6 @@ export default class Trip {
     }
 
     this._currentSortType = sortType;
-    this._clearPointsList();
-    this._renderPointsList();
   }
 
   _handleSortTypeChange(sortType) {
@@ -88,6 +86,8 @@ export default class Trip {
     }
 
     this._sortTasks(sortType);
+    this._clearPointsList();
+    this._renderPointsList();
   }
 
   _renderTrip() {
