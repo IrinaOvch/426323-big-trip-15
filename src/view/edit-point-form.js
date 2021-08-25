@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import {generateOffers} from './../utils/trip-point.js';
+import {capitalizeFirstLetter} from '../utils/common.js';
 import Smart from './smart.js';
 import {generateDestinations} from '../mock/destinations.js';
 
@@ -118,7 +119,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${point.price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationNames.includes(point.destination) ? '' : 'disabled'}>Save</button>
         <button class="event__reset-btn" type="reset">Delete</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -153,12 +154,10 @@ export default class EditPointForm extends Smart {
   constructor(point) {
     super();
     this._point = point;
-    // this._saveButton = this.getElement().querySelector('.event__save-btn');
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._editClickHandler = this._editClickHandler.bind(this);
     this._pointTypeSelectHandler = this._pointTypeSelectHandler.bind(this);
-    this._pointDestinationClickHandler = this._pointDestinationClickHandler.bind(this);
     this._pointDestinationInputHandler = this._pointDestinationInputHandler.bind(this);
 
     this._setInnerHandlers();
@@ -187,28 +186,30 @@ export default class EditPointForm extends Smart {
 
   _pointTypeSelectHandler(evt) {
     this.updateData({
-      type: evt.target.innerHTML,
+      type: capitalizeFirstLetter(evt.target.parentElement.querySelector('input').value),
     });
   }
 
-  _pointDestinationClickHandler(evt) {
-    evt.target.value = '';
-    this.getElement().querySelector('.event__save-btn').disabled = true;
-  }
-
   _pointDestinationInputHandler(evt) {
-    if (destinationNames.includes(evt.target.value)) {
-      this.updateData({
-        destination: evt.target.value,
-      });
-      this.getElement().querySelector('.event__save-btn').disabled = false;
+    this.updateData({
+      destination: evt.target.value,
+    });
+
+    const destinationInput = this.getElement().querySelector('.event__input--destination');
+    const val = evt.target.value;
+
+    destinationInput.value = '';
+    destinationInput.focus();
+    destinationInput.value = val;
+
+    if (!destinationNames.includes(evt.target.value)) {
+      this.getElement().querySelector('.event__save-btn').disabled = true;
     }
   }
 
   _setInnerHandlers() {
     this.getElement().querySelector('.event__type-list').addEventListener('click', this._pointTypeSelectHandler);
-    this.getElement().querySelector('.event__input--destination').addEventListener('click', this._pointDestinationClickHandler);
-    this.getElement().querySelector('.event__input--destination').addEventListener('change', this._pointDestinationInputHandler);
+    this.getElement().querySelector('.event__input--destination').addEventListener('input', this._pointDestinationInputHandler);
   }
 
   setEditClickHandler(callback) {
