@@ -1,5 +1,6 @@
 import {getRandomInteger, getRandomElements} from './../utils/common.js';
 import {generateOffers} from './../utils/trip-point.js';
+import {destinationNames} from './destinations.js';
 import dayjs from 'dayjs';
 
 const generateType = () => {
@@ -20,21 +21,10 @@ const generateType = () => {
   return types[randomIndex];
 };
 
-const generateDestination = () => {
-  const destinations = [
-    'Stockholm',
-    'Karlstad',
-    'Göteborg',
-    'Åmål',
-    'Lidingö',
-    'Dalarna',
-    'Malmö',
-    'Lund',
-  ];
+const getDestination = () => {
+  const randomIndex = getRandomInteger(0, destinationNames.length - 1);
 
-  const randomIndex = getRandomInteger(0, destinations.length - 1);
-
-  return destinations[randomIndex];
+  return destinationNames[randomIndex];
 };
 
 const generateDate = (i) => ({
@@ -42,17 +32,6 @@ const generateDate = (i) => ({
   dateTo: dayjs().add(getRandomInteger((i+1)*10, (i+2)*10), 'day').add(getRandomInteger(0, 24), 'hour').toDate(),
 });
 
-
-const generateDescription = () => {
-  const minAmount = 1;
-  const maxAmount = 5;
-  const descriptionTemplate = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.';
-  const descriptions = descriptionTemplate.split('. ');
-
-  return getRandomElements(descriptions, getRandomInteger(minAmount, maxAmount)).join('. ');
-};
-
-const generatePhotos = () => new Array(getRandomInteger(1, 10)).fill().map(() => `http://picsum.photos/248/152?r=${Math.random()}`);
 
 const generateTripPoint = (i) => {
 
@@ -62,17 +41,13 @@ const generateTripPoint = (i) => {
 
   return {
     type: pointType,
-    destination: generateDestination(),
+    destination: getDestination(),
     offers: getRandomElements(availableOffers, getRandomInteger(0, availableOffers.length)),
     id: i,
     dateFrom,
     dateTo,
     price: getRandomInteger(0, 2000),
     isFavourite: Boolean(getRandomInteger(0, 1)),
-    destinationInfo: {
-      description: generateDescription(),
-      photos: generatePhotos(),
-    },
   };
 };
 

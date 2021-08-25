@@ -1,6 +1,11 @@
 import dayjs from 'dayjs';
 import {generateOffers} from './../utils/trip-point.js';
-import AbstractView from './abstract.js';
+import Smart from './smart.js';
+import {generateDestinations} from '../mock/destinations.js';
+
+const destinations = generateDestinations();
+const destinationNames = destinations.map((destinaton) => destinaton.name);
+const getDestinationPhotos = (destination) => destination.pictures.map((photo) => `<img class="event__photo" src="${photo.src}" alt="Event photo">`);
 
 const createOffersList = (point) => {
   const offers = generateOffers(point.type);
@@ -15,6 +20,9 @@ const createOffersList = (point) => {
       </label>
     </div>`).join('');
 };
+
+
+const createDestinationsOptions = () => destinations.map((destination) => `<option value="${destination.name}"></option>`).join('');
 
 
 const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
@@ -90,9 +98,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${point.destination}" list="destination-list-1">
           <datalist id="destination-list-1">
-            <option value="Amsterdam"></option>
-            <option value="Geneva"></option>
-            <option value="Chamonix"></option>
+            ${createDestinationsOptions()}
           </datalist>
         </div>
 
@@ -127,10 +133,15 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
       </div>
     </section>`: ''}
 
-        ${point.destinationInfo.description ?
+        ${destinationNames.includes(point.destination) ?
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${point.destinationInfo.description}.</p>
+      <p class="event__destination-description">${destinations[destinationNames.indexOf(point.destination)].description}.</p>
+      <div class="event__photos-container">
+        <div class="event__photos-tape">
+        ${getDestinationPhotos(destinations[destinationNames.indexOf(point.destination)])}
+        </div>
+      </div>
     </section>`
     : ''}
 
@@ -138,17 +149,25 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
     </form>
   </li>`);
 
-export default class EitPointForm extends AbstractView {
+export default class EditPointForm extends Smart {
   constructor(point) {
     super();
     this._point = point;
+    // this._saveButton = this.getElement().querySelector('.event__save-btn');
+
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._editClickHandler = this._editClickHandler.bind(this);
+    this._pointTypeSelectHandler = this._pointTypeSelectHandler.bind(this);
+    this._pointDestinationClickHandler = this._pointDestinationClickHandler.bind(this);
+    this._pointDestinationInputHandler = this._pointDestinationInputHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
-  _formSubmitHandler(evt) {
-    evt.preventDefault();
-    this._callback.formSubmit(this._point);
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setEditClickHandler(this._callback.editClick);
   }
 
   setFormSubmitHandler(callback) {
@@ -156,9 +175,40 @@ export default class EitPointForm extends AbstractView {
     this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
   }
 
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit(this._point);
+  }
+
   _editClickHandler(evt) {
     evt.preventDefault();
     this._callback.editClick();
+  }
+
+  _pointTypeSelectHandler(evt) {
+    this.updateData({
+      type: evt.target.innerHTML,
+    });
+  }
+
+  _pointDestinationClickHandler(evt) {
+    evt.target.value = '';
+    this.getElement().querySelector('.event__save-btn').disabled = true;
+  }
+
+  _pointDestinationInputHandler(evt) {
+    if (destinationNames.includes(evt.target.value)) {
+      this.updateData({
+        destination: evt.target.value,
+      });
+      this.getElement().querySelector('.event__save-btn').disabled = false;
+    }
+  }
+
+  _setInnerHandlers() {
+    this.getElement().querySelector('.event__type-list').addEventListener('click', this._pointTypeSelectHandler);
+    this.getElement().querySelector('.event__input--destination').addEventListener('click', this._pointDestinationClickHandler);
+    this.getElement().querySelector('.event__input--destination').addEventListener('change', this._pointDestinationInputHandler);
   }
 
   setEditClickHandler(callback) {
