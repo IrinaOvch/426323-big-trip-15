@@ -23,4 +23,6 @@ const updateItem = (items, update) => {
   ];
 };
 
-export {isEscPressed, getRandomInteger, getRandomElements, updateItem};
+const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+export {isEscPressed, getRandomInteger, getRandomElements, updateItem, capitalizeFirstLetter};
