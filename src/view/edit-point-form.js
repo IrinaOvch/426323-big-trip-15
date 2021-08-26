@@ -191,13 +191,15 @@ export default class EditPointForm extends Smart {
   }
 
   _pointDestinationInputHandler(evt) {
-    this.updateData({
-      destination: evt.target.value,
-    });
 
+    if (destinationNames.includes(evt.target.value) || evt.target.value === '') {
+      this.updateData({
+        destination: evt.target.value,
+      });
+    }
     const destinationInput = this.getElement().querySelector('.event__input--destination');
-    const val = evt.target.value;
 
+    const val = evt.target.value;
     destinationInput.value = '';
     destinationInput.focus();
     destinationInput.value = val;
