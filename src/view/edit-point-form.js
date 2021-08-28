@@ -239,7 +239,7 @@ export default class EditPointForm extends Smart {
       {
         enableTime: true,
         defaultDate: this._point.dateFrom,
-        minDate: 'today',
+        maxDate: this._point.dateTo,
         ['time_24hr']: true,
         onChange: this._startDateChangeHandler,
       },
