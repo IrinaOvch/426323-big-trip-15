@@ -3,6 +3,9 @@ import {generateOffers} from './../utils/trip-point.js';
 import {capitalizeFirstLetter} from '../utils/common.js';
 import Smart from './smart.js';
 import {generateDestinations} from '../mock/destinations.js';
+import flatpickr from 'flatpickr';
+
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const destinations = generateDestinations();
 const destinationNames = destinations.map((destinaton) => destinaton.name);
@@ -105,10 +108,10 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs(point.dateFrom).format('DD/MM/YY hh:mm')}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs(point.dateFrom).format('DD/MM/YY HH:mm')}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dayjs(point.dateTo).format('DD/MM/YY hh:mm')}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dayjs(point.dateTo).format('DD/MM/YY HH:mm')}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -154,19 +157,25 @@ export default class EditPointForm extends Smart {
   constructor(point) {
     super();
     this._point = point;
+    this._startDatepicker = null;
+    this._endDatepicker = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._editClickHandler = this._editClickHandler.bind(this);
     this._pointTypeSelectHandler = this._pointTypeSelectHandler.bind(this);
     this._pointDestinationInputHandler = this._pointDestinationInputHandler.bind(this);
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   restoreHandlers() {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setEditClickHandler(this._callback.editClick);
+    this._setDatepicker();
   }
 
   setFormSubmitHandler(callback) {
@@ -191,13 +200,15 @@ export default class EditPointForm extends Smart {
   }
 
   _pointDestinationInputHandler(evt) {
-    this.updateData({
-      destination: evt.target.value,
-    });
 
+    if (destinationNames.includes(evt.target.value) || evt.target.value === '') {
+      this.updateData({
+        destination: evt.target.value,
+      });
+    }
     const destinationInput = this.getElement().querySelector('.event__input--destination');
-    const val = evt.target.value;
 
+    const val = evt.target.value;
     destinationInput.value = '';
     destinationInput.focus();
     destinationInput.value = val;
@@ -210,6 +221,52 @@ export default class EditPointForm extends Smart {
   _setInnerHandlers() {
     this.getElement().querySelector('.event__type-list').addEventListener('click', this._pointTypeSelectHandler);
     this.getElement().querySelector('.event__input--destination').addEventListener('input', this._pointDestinationInputHandler);
+  }
+
+  _setDatepicker() {
+    if (this._startDatepicker) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+
+    if (this._endDatepicker) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
+    }
+
+    this._startDatepicker = flatpickr(
+      this.getElement().querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        defaultDate: this._point.dateFrom,
+        maxDate: this._point.dateTo,
+        ['time_24hr']: true,
+        onChange: this._startDateChangeHandler,
+      },
+    );
+
+    this._endDatepicker = flatpickr(
+      this.getElement().querySelector('#event-end-time-1'),
+      {
+        defaultDate: this._point.dateTo,
+        enableTime: true,
+        ['time_24hr']: true,
+        minDate: this._point.dateFrom,
+        onChange: this._endDateChangeHandler,
+      },
+    );
+  }
+
+  _startDateChangeHandler([userDate]) {
+    this.updateData({
+      dateFrom: userDate,
+    });
+  }
+
+  _endDateChangeHandler([userDate]) {
+    this.updateData({
+      dateTo: userDate,
+    });
   }
 
   setEditClickHandler(callback) {
