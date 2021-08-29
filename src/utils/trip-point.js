@@ -127,4 +127,8 @@ const sortPointsByDuration = (pointA, pointB) => {
 
 const sortPointsByPrice = (pointA, pointB) => pointB.price - pointA.price;
 
-export {generateOffers, sortPointsByDate, sortPointsByDuration, sortPointsByPrice};
+const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) ? true : dayjs(dateA).isSame(dateB, 'D');
+
+const isFuture = (date) => date === null ? false : dayjs(date).isAfter(dayjs(), 'D');
+
+export {generateOffers, sortPointsByDate, sortPointsByDuration, sortPointsByPrice, isDatesEqual, isFuture};

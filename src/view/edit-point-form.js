@@ -1,11 +1,22 @@
 import dayjs from 'dayjs';
+import he from 'he';
+import flatpickr from 'flatpickr';
 import {generateOffers} from './../utils/trip-point.js';
 import {capitalizeFirstLetter} from '../utils/common.js';
 import Smart from './smart.js';
 import {generateDestinations} from '../mock/destinations.js';
-import flatpickr from 'flatpickr';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+
+const BLANK_POINT = {
+  dateFrom: 'today',
+  dateTo: 'today',
+  destination: '',
+  isFavourite: false,
+  offers: [],
+  price: 0,
+  type: 'Flight',
+};
 
 const destinations = generateDestinations();
 const destinationNames = destinations.map((destinaton) => destinaton.name);
@@ -100,7 +111,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
           <label class="event__label  event__type-output" for="event-destination-1">
           ${point.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${point.destination}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(point.destination)}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${createDestinationsOptions()}
           </datalist>
@@ -119,7 +130,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${point.price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${point.price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationNames.includes(point.destination) ? '' : 'disabled'}>Save</button>
@@ -129,15 +140,14 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
         </button>
       </header>
       <section class="event__details">
-          ${point.offers ?
-    `<section class="event__section  event__section--offers">
+    <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
         ${createOffersList(point)}
       </div>
-    </section>`: ''}
+    </section>
 
-        ${destinationNames.includes(point.destination) ?
+      ${destinationNames.includes(point.destination) ?
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
       <p class="event__destination-description">${destinations[destinationNames.indexOf(point.destination)].description}.</p>
@@ -154,7 +164,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
   </li>`);
 
 export default class EditPointForm extends Smart {
-  constructor(point) {
+  constructor(point = BLANK_POINT) {
     super();
     this._point = point;
     this._startDatepicker = null;
@@ -166,15 +176,33 @@ export default class EditPointForm extends Smart {
     this._pointDestinationInputHandler = this._pointDestinationInputHandler.bind(this);
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
+    this._priceChangeHandler = this._priceChangeHandler.bind(this);
+    this._offersChangeHandler = this._offersChangeHandler.bind(this);
 
     this._setInnerHandlers();
     this._setDatepicker();
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this._startDatepicker) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+
+    if (this._endDatepicker) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
+    }
   }
 
   restoreHandlers() {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setEditClickHandler(this._callback.editClick);
+    this.setDeleteClickHandler(this._callback.deleteClick);
     this._setDatepicker();
   }
 
@@ -199,6 +227,39 @@ export default class EditPointForm extends Smart {
     });
   }
 
+  _priceChangeHandler(evt) {
+    this.updateData({
+      price: evt.target.value,
+    }, true);
+  }
+
+  _offersChangeHandler(evt) {
+    const pointOffersNames = this._point.offers.map((offer) => offer.name);
+    if (evt.target.tagName === 'LABEL') {
+      const clickedOfferName = evt.target.querySelector('.event__offer-title').innerHTML;
+      const clickedOfferPrice = evt.target.querySelector('.event__offer-price').innerHTML;
+      if (pointOffersNames.includes(clickedOfferName)) {
+        const offerIndex = pointOffersNames.findIndex((offer) => offer === clickedOfferName);
+        this.updateData({
+          offers: [
+            ...this._point.offers.slice(0, offerIndex),
+            ...this._point.offers.slice(offerIndex + 1),
+          ],
+        }, true);
+      } else {
+        this.updateData({
+          offers: [
+            ...this._point.offers,
+            {
+              name: clickedOfferName,
+              price: clickedOfferPrice,
+            },
+          ],
+        }, true);
+      }
+    }
+  }
+
   _pointDestinationInputHandler(evt) {
 
     if (destinationNames.includes(evt.target.value) || evt.target.value === '') {
@@ -221,6 +282,10 @@ export default class EditPointForm extends Smart {
   _setInnerHandlers() {
     this.getElement().querySelector('.event__type-list').addEventListener('click', this._pointTypeSelectHandler);
     this.getElement().querySelector('.event__input--destination').addEventListener('input', this._pointDestinationInputHandler);
+    this.getElement().querySelector('.event__input--price').addEventListener('change',  this._priceChangeHandler);
+    if (this.getElement().querySelector('.event__available-offers')) {
+      this.getElement().querySelector('.event__available-offers').addEventListener('click',  this._offersChangeHandler);
+    }
   }
 
   _setDatepicker() {
@@ -242,6 +307,7 @@ export default class EditPointForm extends Smart {
         maxDate: this._point.dateTo,
         ['time_24hr']: true,
         onChange: this._startDateChangeHandler,
+        dateFormat: 'y/m/d H:i',
       },
     );
 
@@ -253,6 +319,7 @@ export default class EditPointForm extends Smart {
         ['time_24hr']: true,
         minDate: this._point.dateFrom,
         onChange: this._endDateChangeHandler,
+        dateFormat: 'y/m/d H:i',
       },
     );
   }
@@ -272,6 +339,16 @@ export default class EditPointForm extends Smart {
   setEditClickHandler(callback) {
     this._callback.editClick = callback;
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
+  }
+
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(this._point);
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
   }
 
   getTemplate() {

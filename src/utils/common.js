@@ -9,20 +9,6 @@ const getRandomInteger = (a = 0, b = 1) => {
 
 const getRandomElements = (array, amount) => array.slice().sort(() => 0.5 - Math.random()).slice(0, amount);
 
-const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
-};
-
 const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
-export {isEscPressed, getRandomInteger, getRandomElements, updateItem, capitalizeFirstLetter};
+export {isEscPressed, getRandomInteger, getRandomElements, capitalizeFirstLetter};

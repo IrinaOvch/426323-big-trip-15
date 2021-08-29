@@ -2,6 +2,8 @@ import TripPointView from '../view/trip-point.js';
 import EditPointFormView from '../view/edit-point-form.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
 import {isEscPressed} from '../utils/common.js';
+import {UserAction, UpdateType} from '../const.js';
+import {isDatesEqual} from '../utils/trip-point.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -23,6 +25,7 @@ export default class TripPoint {
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._handleMinimizeClick = this._handleMinimizeClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handleDeleteClick = this._handleDeleteClick.bind(this);
   }
 
   init(point) {
@@ -38,6 +41,7 @@ export default class TripPoint {
     this._tripPointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._EditTripPointComponent.setEditClickHandler(this._handleMinimizeClick);
     this._EditTripPointComponent.setFormSubmitHandler(this._handleFormSubmit);
+    this._EditTripPointComponent.setDeleteClickHandler(this._handleDeleteClick);
 
     if (prevTripPointComponent === null || prevEditTripPointComponent === null) {
       render(this._pointsListContainer, this._tripPointComponent, RenderPosition.BEFOREEND);
@@ -98,6 +102,8 @@ export default class TripPoint {
 
   _handleFavoriteClick() {
     this._changeData(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
       Object.assign(
         {},
         this._point,
@@ -108,8 +114,25 @@ export default class TripPoint {
     );
   }
 
-  _handleFormSubmit() {
-    this._changeData(this._point);
+  _handleFormSubmit(update) {
+    const isMinorUpdate =
+    !isDatesEqual(this._point.dateFrom, update.dateFrom) ||
+    !isDatesEqual(this._point.dateTo, update.dateTo) ||
+    !(this._point.price === update.price);
+
+    this._changeData(
+      UserAction.UPDATE_POINT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update,
+    );
     this._replaceFormToCard();
+  }
+
+  _handleDeleteClick(point) {
+    this._changeData(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point,
+    );
   }
 }
