@@ -94,7 +94,7 @@ export default class Trip {
     this._tripPointPresenter.clear();
   }
 
-  _clearTrip(resetSortType = false) {
+  _clearTrip({resetSortType = false}) {
     this._newPointPresenter.destroy();
     this._tripPointPresenter.forEach((presenter) => presenter.destroy());
     this._tripPointPresenter.clear();
@@ -143,9 +143,8 @@ export default class Trip {
     if (this._currentSortType === sortType) {
       return;
     }
-
     this._currentSortType = sortType;
-    this._clearTrip({resetSortType: true});
+    this._clearTrip({resetSortType: false});
     this._renderTrip();
   }
 
