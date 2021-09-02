@@ -9,7 +9,7 @@ const createSortingTemplate = () => (
     </div>
 
     <div class="trip-sort__item  trip-sort__item--event">
-      <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" disabled data-sort-type="${SortType.EVENT}">
+      <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" disabled>
       <label class="trip-sort__btn" for="sort-event">Event</label>
     </div>
 
