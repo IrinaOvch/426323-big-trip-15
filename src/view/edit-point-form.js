@@ -1,10 +1,7 @@
 import dayjs from 'dayjs';
-import he from 'he';
 import flatpickr from 'flatpickr';
-import {generateOffers} from './../utils/trip-point.js';
 import {capitalizeFirstLetter} from '../utils/common.js';
 import Smart from './smart.js';
-import {generateDestinations} from '../mock/destinations.js';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
@@ -19,29 +16,25 @@ const BLANK_POINT = {
   isBlank: true,
 };
 
-const destinations = generateDestinations();
-const destinationNames = destinations.map((destinaton) => destinaton.name);
+const createDestinationsOptions = (destinations) => destinations.map((destination) => `<option value="${destination.name}"></option>`).join('');
+
 const getDestinationPhotos = (destination) => destination.pictures.map((photo) => `<img class="event__photo" src="${photo.src}" alt="Event photo">`);
 
-const createOffersList = (point) => {
-  const offers = generateOffers(point.type);
-  const pointOffers = point.offers.map((offer) => offer.name);
+const createOffersList = (point, offers) => {
+  const pointAvialiableOffers = offers.find((offer) => offer.name === point.type).offers;
+  const pointOffers = point.offers.map((offer) => offer.title);
 
-  return offers.map((offer, i) => `<div class="event__offer-selector">
-      <input ${pointOffers.includes(offer.name) ? 'checked' : ''} class="event__offer-checkbox  visually-hidden" id="event-offer-${i}" type="checkbox" name="event-offer-luggage">
+  return pointAvialiableOffers.map((offer, i) => `<div class="event__offer-selector">
+      <input ${pointOffers.includes(offer.title) ? 'checked' : ''} class="event__offer-checkbox  visually-hidden" id="event-offer-${i}" type="checkbox" name="event-offer-luggage">
       <label class="event__offer-label" for="event-offer-${i}">
-        <span class="event__offer-title">${offer.name}</span>
+        <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offer.price}</span>
       </label>
     </div>`).join('');
 };
 
-
-const createDestinationsOptions = () => destinations.map((destination) => `<option value="${destination.name}"></option>`).join('');
-
-
-const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
+const createEditPointFormTemplate = (point, offers, destinations, destinationNames) => (`<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
@@ -112,9 +105,9 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
           <label class="event__label  event__type-output" for="event-destination-1">
           ${point.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(point.destination)}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${point.destination.name}" list="destination-list-1">
           <datalist id="destination-list-1">
-            ${createDestinationsOptions()}
+            ${createDestinationsOptions(destinations)}
           </datalist>
         </div>
 
@@ -134,7 +127,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
           <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${point.price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationNames.includes(point.destination) ? '' : 'disabled'}>Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationNames.includes(point.destination.name) ? '' : 'disabled'}>Save</button>
         <button class="event__reset-btn" type="reset">${point.isBlank ? 'Cancel' : 'Delete'}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -144,7 +137,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${createOffersList(point)}
+        ${createOffersList(point, offers, destinations)}
       </div>
     </section>
 
@@ -162,12 +155,16 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
 
       </section>
     </form>
-  </li>`);
+  </li>`
+);
 
 export default class EditPointForm extends Smart {
-  constructor(point = BLANK_POINT) {
+  constructor(point = BLANK_POINT, appDataModel) {
     super();
     this._point = point;
+    this._offersData = appDataModel.getOffers();
+    this._destinationsData = appDataModel.getDestinations();
+    this._destinationNames = this._destinationsData.map((destinaton) => destinaton.name);
     this._startDatepicker = null;
     this._endDatepicker = null;
 
@@ -263,9 +260,11 @@ export default class EditPointForm extends Smart {
 
   _pointDestinationInputHandler(evt) {
 
-    if (destinationNames.includes(evt.target.value) || evt.target.value === '') {
+    if (this._destinationNames.includes(evt.target.value) || evt.target.value === '') {
       this.updateData({
-        destination: evt.target.value,
+        destination:{
+          name: evt.target.value,
+        },
       });
     }
     const destinationInput = this.getElement().querySelector('.event__input--destination');
@@ -275,7 +274,7 @@ export default class EditPointForm extends Smart {
     destinationInput.focus();
     destinationInput.value = val;
 
-    if (!destinationNames.includes(evt.target.value)) {
+    if (!this._destinationNames.includes(evt.target.value)) {
       this.getElement().querySelector('.event__save-btn').disabled = true;
     }
   }
@@ -353,6 +352,6 @@ export default class EditPointForm extends Smart {
   }
 
   getTemplate() {
-    return createEditPointFormTemplate(this._point);
+    return createEditPointFormTemplate(this._point, this._offersData, this._destinationsData, this._destinationNames);
   }
 }

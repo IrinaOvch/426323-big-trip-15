@@ -6,8 +6,9 @@ export default class Points extends AbstractObserver {
     this._points = [];
   }
 
-  setPoints(points) {
+  setPoints(updateType, points) {
     this._points = points.slice();
+    this._notify(updateType);
   }
 
   getPoints() {
@@ -51,5 +52,45 @@ export default class Points extends AbstractObserver {
     ];
 
     this._notify(updateType);
+  }
+
+  static adaptToClient(point) {
+    const adaptedPoint = Object.assign(
+      {},
+      point,
+      {
+        dateFrom: point['date_from'],
+        dateTo: point['date_to'],
+        price: point['base_price'],
+        isFavourite: point['is_favorite'],
+      },
+    );
+
+    delete adaptedPoint['date_from'];
+    delete adaptedPoint['date_to'];
+    delete adaptedPoint['base_price'];
+    delete adaptedPoint['is_favorite'];
+
+    return adaptedPoint;
+  }
+
+  static adaptToServer(point) {
+    const adaptedPoint = Object.assign(
+      {},
+      point,
+      {
+        'date_from': point.dateFrom,
+        'date_to': point.dateTo,
+        'base_price': point.price,
+        'is_favorite': point.isFavourite,
+      },
+    );
+
+    delete adaptedPoint.dateFrom;
+    delete adaptedPoint.dateTo;
+    delete adaptedPoint.price;
+    delete adaptedPoint.isFavourite;
+
+    return adaptedPoint;
   }
 }
