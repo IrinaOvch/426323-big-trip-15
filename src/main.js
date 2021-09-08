@@ -9,7 +9,7 @@ import Api from './api.js';
 import AppDataModel from './model/app-data.js';
 import { UpdateType } from './const.js';
 
-const AUTHORIZATION = 'Basic fklkofsk994';
+const AUTHORIZATION = 'Basic flkdsdfsjkllkofsk994';
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 
 const siteNavigationContainer = document.querySelector('.trip-controls__navigation');
@@ -43,8 +43,9 @@ api.getData()
     pointsModel.setPoints(UpdateType.INIT, points);
     render(mainInfoContainer, new TripInfoView(points), RenderPosition.AFTERBEGIN);
   })
-  .catch(() => {
+  .catch((err) => {
     pointsModel.setPoints(UpdateType.INIT, []);
+    tripPresenter.renderErrorMessage(err);
   });
 
 filterPresenter.init();

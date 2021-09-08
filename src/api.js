@@ -39,15 +39,12 @@ export default class Api {
       this.getPoints(),
       this.getOffers(),
       this.getDestinations(),
-    ])
-      .catch((error) => {
-        throw new Error(error);
-      });
+    ]);
   }
 
   updatePoint(point) {
     return this._load({
-      url: `point/${point.id}`,
+      url: `points/${point.id}`,
       method: Method.PUT,
       body: JSON.stringify(PointsModel.adaptToServer(point)),
       headers: new Headers({'Content-Type': 'application/json'}),
@@ -68,8 +65,7 @@ export default class Api {
       `${this._endPoint}/${url}`,
       {method, body, headers},
     )
-      .then(Api.checkStatus)
-      .catch(Api.catchError);
+      .then(Api.checkStatus);
   }
 
   static checkStatus(response) {
@@ -85,9 +81,5 @@ export default class Api {
 
   static toJSON(response) {
     return response.json();
-  }
-
-  static catchError(err) {
-    throw err;
   }
 }

@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
-import {capitalizeFirstLetter} from '../utils/common.js';
 import Smart from './smart.js';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
@@ -221,21 +220,21 @@ export default class EditPointForm extends Smart {
 
   _pointTypeSelectHandler(evt) {
     this.updateData({
-      type: capitalizeFirstLetter(evt.target.parentElement.querySelector('input').value),
+      type: evt.target.parentElement.querySelector('input').value,
     });
   }
 
   _priceChangeHandler(evt) {
     this.updateData({
-      price: evt.target.value,
+      price: Number(evt.target.value),
     }, true);
   }
 
   _offersChangeHandler(evt) {
-    const pointOffersNames = this._point.offers.map((offer) => offer.name);
-    if (evt.target.tagName === 'LABEL') {
-      const clickedOfferName = evt.target.querySelector('.event__offer-title').innerHTML;
-      const clickedOfferPrice = evt.target.querySelector('.event__offer-price').innerHTML;
+    const pointOffersNames = this._point.offers.map((offer) => offer.title);
+    if (evt.target.tagName === 'INPUT') {
+      const clickedOfferName = evt.target.parentElement.querySelector('.event__offer-title').innerHTML;
+      const clickedOfferPrice = Number(evt.target.parentElement.querySelector('.event__offer-price').innerHTML);
       if (pointOffersNames.includes(clickedOfferName)) {
         const offerIndex = pointOffersNames.findIndex((offer) => offer === clickedOfferName);
         this.updateData({
@@ -249,7 +248,7 @@ export default class EditPointForm extends Smart {
           offers: [
             ...this._point.offers,
             {
-              name: clickedOfferName,
+              title: clickedOfferName,
               price: clickedOfferPrice,
             },
           ],
@@ -260,10 +259,14 @@ export default class EditPointForm extends Smart {
 
   _pointDestinationInputHandler(evt) {
 
+
     if (this._destinationNames.includes(evt.target.value) || evt.target.value === '') {
+      const chosenDestination = this._destinationsData.find((destination) => destination.name === evt.target.value);
       this.updateData({
-        destination:{
+        destination: {
           name: evt.target.value,
+          description: chosenDestination ? chosenDestination.description : '',
+          pictures: chosenDestination ? chosenDestination.pictures : [],
         },
       });
     }

@@ -8,9 +8,9 @@ const NoPointsTextType = {
 };
 
 const createEmptyPointsListTemplate = (filterType) => {
-  const noPoinysTextValue = NoPointsTextType[filterType];
+  const noPointsTextValue = NoPointsTextType[filterType];
   return (
-    `<p class="trip-events__msg">${noPoinysTextValue}</p>`
+    `<p class="trip-events__msg">${noPointsTextValue}</p>`
   );
 };
 

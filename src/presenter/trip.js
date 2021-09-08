@@ -4,6 +4,7 @@ import EmptyPointsListView from '../view/empty-points-list-message.js';
 import SiteSortingView from '../view/site-sorting.js';
 import TripPointPresenter from './trip-point.js';
 import NewPointPresenter from './new-point.js';
+import ErrorMessageView from '../view/error-message.js';
 import LoadingView from '../view/loading.js';
 import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
 import {sortPointsByDate, sortPointsByDuration, sortPointsByPrice} from '../utils/trip-point.js';
@@ -23,6 +24,7 @@ export default class Trip {
     this._currentSortType = SortType.DEFAULT;
     this._isLoading = true;
     this._noPointsComponent = null;
+    this._errorMessageComponent = null;
 
     this._sortComponent = null;
 
@@ -48,6 +50,11 @@ export default class Trip {
     this._currentSortType = SortType.DEFAULT;
     this._filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
     this._newPointPresenter.init();
+  }
+
+  renderErrorMessage(err) {
+    this._errorMessageComponent = new ErrorMessageView(err);
+    render(this._mainContentContainer, this._errorMessageComponent , RenderPosition.AFTERBEGIN);
   }
 
   _getPoints() {
@@ -104,7 +111,7 @@ export default class Trip {
     this._tripPointPresenter.clear();
   }
 
-  _clearTrip({resetSortType = false}) {
+  _clearTrip({resetSortType = false} = {}) {
     this._newPointPresenter.destroy();
     this._tripPointPresenter.forEach((presenter) => presenter.destroy());
     this._tripPointPresenter.clear();
