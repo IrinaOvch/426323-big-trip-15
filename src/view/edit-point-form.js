@@ -1,47 +1,43 @@
 import dayjs from 'dayjs';
-import he from 'he';
 import flatpickr from 'flatpickr';
-import {generateOffers} from './../utils/trip-point.js';
-import {capitalizeFirstLetter} from '../utils/common.js';
 import Smart from './smart.js';
-import {generateDestinations} from '../mock/destinations.js';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
-  dateFrom: 'today',
-  dateTo: 'today',
-  destination: '',
+  dateFrom: dayjs(),
+  dateTo: dayjs(),
+  destination: {
+    name: '',
+    description: '',
+    pictures: [],
+  },
   isFavourite: false,
   offers: [],
   price: 0,
-  type: 'Flight',
+  type: 'flight',
   isBlank: true,
 };
 
-const destinations = generateDestinations();
-const destinationNames = destinations.map((destinaton) => destinaton.name);
+const createDestinationsOptions = (destinations) => destinations.map((destination) => `<option value="${destination.name}"></option>`).join('');
+
 const getDestinationPhotos = (destination) => destination.pictures.map((photo) => `<img class="event__photo" src="${photo.src}" alt="Event photo">`);
 
-const createOffersList = (point) => {
-  const offers = generateOffers(point.type);
-  const pointOffers = point.offers.map((offer) => offer.name);
+const createOffersList = (point, offers) => {
+  const pointAvialiableOffers = (offers.find((offer) => offer.name === point.type) || { offers: []}).offers;
+  const pointOffers = point.offers.map((offer) => offer.title);
 
-  return offers.map((offer, i) => `<div class="event__offer-selector">
-      <input ${pointOffers.includes(offer.name) ? 'checked' : ''} class="event__offer-checkbox  visually-hidden" id="event-offer-${i}" type="checkbox" name="event-offer-luggage">
+  return pointAvialiableOffers.map((offer, i) => `<div class="event__offer-selector">
+      <input ${pointOffers.includes(offer.title) ? 'checked' : ''} class="event__offer-checkbox  visually-hidden" id="event-offer-${i}" type="checkbox" name="event-offer-luggage">
       <label class="event__offer-label" for="event-offer-${i}">
-        <span class="event__offer-title">${offer.name}</span>
+        <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offer.price}</span>
       </label>
     </div>`).join('');
 };
 
-
-const createDestinationsOptions = () => destinations.map((destination) => `<option value="${destination.name}"></option>`).join('');
-
-
-const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
+const createEditPointFormTemplate = (point, offers, destinations, destinationNames) => (`<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
@@ -112,9 +108,9 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
           <label class="event__label  event__type-output" for="event-destination-1">
           ${point.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(point.destination)}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${point.destination.name}" list="destination-list-1">
           <datalist id="destination-list-1">
-            ${createDestinationsOptions()}
+            ${createDestinationsOptions(destinations)}
           </datalist>
         </div>
 
@@ -134,7 +130,7 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
           <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${point.price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationNames.includes(point.destination) ? '' : 'disabled'}>Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationNames.includes(point.destination.name) ? '' : 'disabled'}>Save</button>
         <button class="event__reset-btn" type="reset">${point.isBlank ? 'Cancel' : 'Delete'}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -144,17 +140,17 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${createOffersList(point)}
+        ${createOffersList(point, offers, destinations)}
       </div>
     </section>
 
-      ${destinationNames.includes(point.destination) ?
+      ${destinationNames.includes(point.destination.name) ?
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${destinations[destinationNames.indexOf(point.destination)].description}.</p>
+      <p class="event__destination-description">${destinations[destinationNames.indexOf(point.destination.name)].description}.</p>
       <div class="event__photos-container">
         <div class="event__photos-tape">
-        ${getDestinationPhotos(destinations[destinationNames.indexOf(point.destination)])}
+        ${getDestinationPhotos(destinations[destinationNames.indexOf(point.destination.name)])}
         </div>
       </div>
     </section>`
@@ -162,12 +158,16 @@ const createEditPointFormTemplate = (point) => (`<li class="trip-events__item">
 
       </section>
     </form>
-  </li>`);
+  </li>`
+);
 
 export default class EditPointForm extends Smart {
-  constructor(point = BLANK_POINT) {
+  constructor(appDataModel, point = BLANK_POINT) {
     super();
     this._point = point;
+    this._offersData = appDataModel.getOffers();
+    this._destinationsData = appDataModel.getDestinations();
+    this._destinationNames = this._destinationsData.map((destinaton) => destinaton.name);
     this._startDatepicker = null;
     this._endDatepicker = null;
 
@@ -224,21 +224,22 @@ export default class EditPointForm extends Smart {
 
   _pointTypeSelectHandler(evt) {
     this.updateData({
-      type: capitalizeFirstLetter(evt.target.parentElement.querySelector('input').value),
+      type: evt.target.parentElement.querySelector('input').value,
+      offers: [],
     });
   }
 
   _priceChangeHandler(evt) {
     this.updateData({
-      price: evt.target.value,
+      price: Number(evt.target.value),
     }, true);
   }
 
   _offersChangeHandler(evt) {
-    const pointOffersNames = this._point.offers.map((offer) => offer.name);
-    if (evt.target.tagName === 'LABEL') {
-      const clickedOfferName = evt.target.querySelector('.event__offer-title').innerHTML;
-      const clickedOfferPrice = evt.target.querySelector('.event__offer-price').innerHTML;
+    const pointOffersNames = this._point.offers.map((offer) => offer.title);
+    if (evt.target.tagName === 'INPUT') {
+      const clickedOfferName = evt.target.parentElement.querySelector('.event__offer-title').innerHTML;
+      const clickedOfferPrice = Number(evt.target.parentElement.querySelector('.event__offer-price').innerHTML);
       if (pointOffersNames.includes(clickedOfferName)) {
         const offerIndex = pointOffersNames.findIndex((offer) => offer === clickedOfferName);
         this.updateData({
@@ -252,7 +253,7 @@ export default class EditPointForm extends Smart {
           offers: [
             ...this._point.offers,
             {
-              name: clickedOfferName,
+              title: clickedOfferName,
               price: clickedOfferPrice,
             },
           ],
@@ -263,9 +264,15 @@ export default class EditPointForm extends Smart {
 
   _pointDestinationInputHandler(evt) {
 
-    if (destinationNames.includes(evt.target.value) || evt.target.value === '') {
+
+    if (this._destinationNames.includes(evt.target.value) || evt.target.value === '') {
+      const chosenDestination = this._destinationsData.find((destination) => destination.name === evt.target.value);
       this.updateData({
-        destination: evt.target.value,
+        destination: {
+          name: evt.target.value,
+          description: chosenDestination ? chosenDestination.description : '',
+          pictures: chosenDestination ? chosenDestination.pictures : [],
+        },
       });
     }
     const destinationInput = this.getElement().querySelector('.event__input--destination');
@@ -275,7 +282,7 @@ export default class EditPointForm extends Smart {
     destinationInput.focus();
     destinationInput.value = val;
 
-    if (!destinationNames.includes(evt.target.value)) {
+    if (!this._destinationNames.includes(evt.target.value)) {
       this.getElement().querySelector('.event__save-btn').disabled = true;
     }
   }
@@ -353,6 +360,6 @@ export default class EditPointForm extends Smart {
   }
 
   getTemplate() {
-    return createEditPointFormTemplate(this._point);
+    return createEditPointFormTemplate(this._point, this._offersData, this._destinationsData, this._destinationNames);
   }
 }

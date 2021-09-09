@@ -5,9 +5,10 @@ import {isEscPressed} from '../utils/common.js';
 import {nanoid} from 'nanoid';
 
 export default class NewPoint {
-  constructor(pointsListContainer, changeData) {
+  constructor(pointsListContainer, changeData, appDataModel) {
     this._pointsListContainer = pointsListContainer;
     this._changeData = changeData;
+    this._appDataModel = appDataModel;
 
     this._pointEditComponent = null;
 
@@ -21,7 +22,7 @@ export default class NewPoint {
       return;
     }
 
-    this._pointEditComponent = new PointEditView();
+    this._pointEditComponent = new PointEditView(this._appDataModel);
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._pointEditComponent.setDeleteClickHandler(this._handleDeleteClick);
     this._pointEditComponent.setEditClickHandler(this._handleDeleteClick);

@@ -11,10 +11,11 @@ const Mode = {
 };
 
 export default class TripPoint {
-  constructor(pointsListContainer, changeData, changeMode) {
+  constructor(pointsListContainer, changeData, changeMode, appDataModel) {
     this._pointsListContainer = pointsListContainer;
     this._changeData = changeData;
     this._changeMode = changeMode;
+    this._appDataModel = appDataModel;
 
     this._tripPointComponent = null;
     this._EditTripPointComponent = null;
@@ -35,7 +36,7 @@ export default class TripPoint {
     const prevEditTripPointComponent = this._EditTripPointComponent;
 
     this._tripPointComponent = new TripPointView(this._point);
-    this._EditTripPointComponent = new EditPointFormView(this._point);
+    this._EditTripPointComponent = new EditPointFormView(this._appDataModel, this._point);
 
     this._tripPointComponent.setEditClickHandler(this._handleEditClick);
     this._tripPointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
