@@ -7,11 +7,15 @@ import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 const BLANK_POINT = {
   dateFrom: 'today',
   dateTo: 'today',
-  destination: '',
+  destination: {
+    name: '',
+    description: '',
+    pictures: [],
+  },
   isFavourite: false,
   offers: [],
   price: 0,
-  type: 'Flight',
+  type: 'flight',
   isBlank: true,
 };
 
@@ -140,13 +144,13 @@ const createEditPointFormTemplate = (point, offers, destinations, destinationNam
       </div>
     </section>
 
-      ${destinationNames.includes(point.destination) ?
+      ${destinationNames.includes(point.destination.name) ?
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${destinations[destinationNames.indexOf(point.destination)].description}.</p>
+      <p class="event__destination-description">${destinations[destinationNames.indexOf(point.destination.name)].description}.</p>
       <div class="event__photos-container">
         <div class="event__photos-tape">
-        ${getDestinationPhotos(destinations[destinationNames.indexOf(point.destination)])}
+        ${getDestinationPhotos(destinations[destinationNames.indexOf(point.destination.name)])}
         </div>
       </div>
     </section>`
@@ -158,7 +162,7 @@ const createEditPointFormTemplate = (point, offers, destinations, destinationNam
 );
 
 export default class EditPointForm extends Smart {
-  constructor(point = BLANK_POINT, appDataModel) {
+  constructor(appDataModel, point = BLANK_POINT) {
     super();
     this._point = point;
     this._offersData = appDataModel.getOffers();
@@ -221,6 +225,7 @@ export default class EditPointForm extends Smart {
   _pointTypeSelectHandler(evt) {
     this.updateData({
       type: evt.target.parentElement.querySelector('input').value,
+      offers: [],
     });
   }
 

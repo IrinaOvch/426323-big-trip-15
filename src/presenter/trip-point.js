@@ -36,7 +36,7 @@ export default class TripPoint {
     const prevEditTripPointComponent = this._EditTripPointComponent;
 
     this._tripPointComponent = new TripPointView(this._point);
-    this._EditTripPointComponent = new EditPointFormView(this._point, this._appDataModel);
+    this._EditTripPointComponent = new EditPointFormView(this._appDataModel, this._point);
 
     this._tripPointComponent.setEditClickHandler(this._handleEditClick);
     this._tripPointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
