@@ -24,7 +24,7 @@ const createDestinationsOptions = (destinations) => destinations.map((destinatio
 const getDestinationPhotos = (destination) => destination.pictures.map((photo) => `<img class="event__photo" src="${photo.src}" alt="Event photo">`);
 
 const createOffersList = (point, offers) => {
-  const pointAvialiableOffers = offers.find((offer) => offer.name === point.type).offers;
+  const pointAvialiableOffers = (offers.find((offer) => offer.name === point.type) || []).offers;
   const pointOffers = point.offers.map((offer) => offer.title);
 
   return pointAvialiableOffers.map((offer, i) => `<div class="event__offer-selector">
