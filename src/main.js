@@ -37,9 +37,12 @@ addPointButton.addEventListener('click', (evt) => {
   tripPresenter.createPoint();
 });
 
-const handleSiteMenuClick = (menuItem) => {
+const handleSiteMenuClick = (menuItem, currentMenuItem) => {
   switch (menuItem) {
     case MenuItem.STATS:
+      if (currentMenuItem === menuItem ) {
+        break;
+      }
       tripPresenter.destroy();
       statisticsComponent = new StatsView(pointsModel.getPoints());
       render(mainContentContainer, statisticsComponent, RenderPosition.BEFOREEND);
@@ -48,6 +51,9 @@ const handleSiteMenuClick = (menuItem) => {
       filterPresenter.init(true);
       break;
     case MenuItem.TABLE:
+      if (currentMenuItem === menuItem ) {
+        break;
+      }
       remove(statisticsComponent);
       render(mainInfoContainer, tripInfoView, RenderPosition.AFTERBEGIN);
       tripPresenter.init();

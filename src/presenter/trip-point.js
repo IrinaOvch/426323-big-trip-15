@@ -60,7 +60,7 @@ export default class TripPoint {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this.__tripPointComponent, prevEditTripPointComponent);
+      replace(this._tripPointComponent, prevEditTripPointComponent);
       this._mode = Mode.DEFAULT;
     }
 
@@ -161,14 +161,16 @@ export default class TripPoint {
     !isDatesEqual(this._point.dateTo, update.dateTo) ||
     !(this._point.price === update.price);
 
+    delete this._point.isDisabled;
+    delete this._point.isSaving;
+    delete this._point.isDeleting;
+
     this._changeData(
       UserAction.UPDATE_POINT,
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
     );
-    delete this._point.isDisabled;
-    delete this._point.isSaving;
-    delete this._point.isDeleting;
+
   }
 
   _handleDeleteClick(point) {

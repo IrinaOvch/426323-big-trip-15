@@ -176,6 +176,7 @@ export default class Trip {
     switch(updateType) {
       case UpdateType.PATCH:
         this._tripPointPresenter.get(data.id).init(data);
+
         break;
       case UpdateType.MINOR:
         this._clearTrip();

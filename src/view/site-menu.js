@@ -12,6 +12,8 @@ export default class SiteMenu extends AbstractView {
   constructor() {
     super();
 
+    this._currentMenuItem = MenuItem.TABLE;
+
     this._menuClickHandler = this._menuClickHandler.bind(this);
   }
 
@@ -21,7 +23,8 @@ export default class SiteMenu extends AbstractView {
 
   _menuClickHandler(evt) {
     evt.preventDefault();
-    this._callback.menuClick(evt.target.dataset.menuType);
+    this._callback.menuClick(evt.target.dataset.menuType, this._currentMenuItem);
+    this._currentMenuItem = evt.target.dataset.menuType;
   }
 
   setMenuClickHandler(callback) {

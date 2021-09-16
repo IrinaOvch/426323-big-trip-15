@@ -11,7 +11,7 @@ const formatDuration = (difference) => {
     return dayjs.duration(difference).format('HH[H] mm[M]');
   }
 
-  if (dayjs.duration(difference).asDays() > 1) {
+  if (dayjs.duration(difference).asDays() >= 1) {
     return dayjs.duration(difference).format('DD[D] HH[H] mm[M]');
   }
 };
