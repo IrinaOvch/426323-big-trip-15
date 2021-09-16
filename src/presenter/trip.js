@@ -2,7 +2,7 @@ import {remove, render, RenderPosition} from '../utils/render.js';
 import PointsListView from '../view/points-list.js';
 import EmptyPointsListView from '../view/empty-points-list-message.js';
 import SiteSortingView from '../view/site-sorting.js';
-import TripPointPresenter from './trip-point.js';
+import TripPointPresenter, {State as PointPresenterViewState} from './trip-point.js';
 import NewPointPresenter from './new-point.js';
 import ErrorMessageView from '../view/error-message.js';
 import LoadingView from '../view/loading.js';
@@ -69,15 +69,15 @@ export default class Trip {
   _getPoints() {
     this._filterType = this._filterModel.getFilter();
     const points = this._pointsModel.getPoints();
-    const filtredTasks = filter[this._filterType](points);
+    const filtredPoints = filter[this._filterType](points);
 
     switch(this._currentSortType) {
       case SortType.TIME:
-        return filtredTasks.sort(sortPointsByDuration);
+        return filtredPoints.sort(sortPointsByDuration);
       case SortType.PRICE:
-        return filtredTasks.sort(sortPointsByPrice);
+        return filtredPoints.sort(sortPointsByPrice);
       default:
-        return filtredTasks.sort(sortPointsByDate);
+        return filtredPoints.sort(sortPointsByDate);
     }
   }
 
@@ -90,7 +90,7 @@ export default class Trip {
     if (this._sortComponent !== null) {
       this._sortComponent = null;
     }
-    this._sortComponent = new SiteSortingView();
+    this._sortComponent = new SiteSortingView(this._currentSortType);
     this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
 
     render(this._mainContentContainer, this._sortComponent, RenderPosition.BEFOREEND);
@@ -140,15 +140,34 @@ export default class Trip {
   _handleViewAction(actionType, updateType, update) {
     switch(actionType) {
       case UserAction.UPDATE_POINT:
-        this._api.updatePoint(update).then((response) => {
-          this._pointsModel.updatePoint(updateType, response);
-        });
+        this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.SAVING);
+        this._api.updatePoint(update)
+          .then((response) => {
+            this._pointsModel.updatePoint(updateType, response);
+          })
+          .catch(() => {
+            this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.ABORTING);
+          });
         break;
       case UserAction.ADD_POINT:
-        this._pointsModel.addPoint(updateType, update);
+        this._newPointPresenter.setSaving();
+        this._api.addPoint(update)
+          .then((response) => {
+            this._pointsModel.addPoint(updateType, response);
+          })
+          .catch(() => {
+            this.NewPointPresenter.setAborting();
+          });
         break;
       case UserAction.DELETE_POINT:
-        this._pointsModel.deletePoint(updateType, update);
+        this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.DELETING);
+        this._api.deletePoint(update)
+          .then(() => {
+            this._pointsModel.deletePoint(updateType, update);
+          })
+          .catch(() => {
+            this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.ABORTING);
+          });
         break;
     }
   }
@@ -197,6 +216,7 @@ export default class Trip {
       render(this._mainContentContainer, this._pointsListComponent, RenderPosition.BEFOREEND);
       this._renderPoints(points);
     } else {
+      render(this._mainContentContainer, this._pointsListComponent, RenderPosition.BEFOREEND);
       this._renderNoPoints();
     }
   }

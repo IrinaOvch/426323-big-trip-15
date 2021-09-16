@@ -11,7 +11,7 @@ import {UpdateType, MenuItem} from './const.js';
 import StatsView from './view/stats.js';
 
 let statisticsComponent = null;
-const AUTHORIZATION = 'Basic flkdsdfsjkllkofsk994';
+const AUTHORIZATION = 'Basic flkdsdffsjdfsjofsk994';
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 
 const siteNavigationContainer = document.querySelector('.trip-controls__navigation');
@@ -44,7 +44,6 @@ const handleSiteMenuClick = (menuItem) => {
       render(mainContentContainer, statisticsComponent, RenderPosition.BEFOREEND);
       break;
     case MenuItem.TABLE:
-
       remove(statisticsComponent);
       tripPresenter.init();
       break;
@@ -62,7 +61,6 @@ api.getData()
     appDataModel.setDestinations(destinations);
     pointsModel.setPoints(UpdateType.INIT, points);
     render(mainInfoContainer, new TripInfoView(points), RenderPosition.AFTERBEGIN);
-    // render(mainContentContainer, new StatsView(points), RenderPosition.BEFOREEND);
   })
   .catch((err) => {
     pointsModel.setPoints(UpdateType.INIT, []);
@@ -71,4 +69,3 @@ api.getData()
 
 filterPresenter.init();
 tripPresenter.init();
-// render(mainContentContainer, new StatsView(pointsModel.getPoints()), RenderPosition.BEFOREEND);

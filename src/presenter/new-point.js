@@ -2,7 +2,6 @@ import PointEditView from '../view/edit-point-form.js';
 import {RenderPosition, remove, render} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
 import {isEscPressed} from '../utils/common.js';
-import {nanoid} from 'nanoid';
 
 export default class NewPoint {
   constructor(pointsListContainer, changeData, appDataModel) {
@@ -42,13 +41,31 @@ export default class NewPoint {
     document.removeEventListener('keydown', this._escKeyDownHandler);
   }
 
+  setSaving() {
+    this._pointEditComponent.updateData({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this._pointEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this._pointEditComponent.shake(resetFormState);
+  }
+
   _handleFormSubmit(point) {
     this._changeData(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
-      Object.assign({id: nanoid()}, point),
+      point,
     );
-    this.destroy();
   }
 
   _handleDeleteClick() {
