@@ -29,9 +29,10 @@ const appDataModel = new AppDataModel();
 
 const tripPresenter = new TripPresenter(mainContentContainer, pointsModel, filterModel, appDataModel, api);
 const filterPresenter = new FilterPresenter(filtersContainer, filterModel, pointsModel);
+const tripInfoView = new TripInfoView(pointsModel);
 
-const button = document.querySelector('.trip-main__event-add-btn');
-button.addEventListener('click', (evt) => {
+const addPointButton = document.querySelector('.trip-main__event-add-btn');
+addPointButton.addEventListener('click', (evt) => {
   evt.preventDefault();
   tripPresenter.createPoint();
 });
@@ -42,10 +43,16 @@ const handleSiteMenuClick = (menuItem) => {
       tripPresenter.destroy();
       statisticsComponent = new StatsView(pointsModel.getPoints());
       render(mainContentContainer, statisticsComponent, RenderPosition.BEFOREEND);
+      remove(tripInfoView);
+      addPointButton.setAttribute('disabled', 'disabled');
+      filterPresenter.init(true);
       break;
     case MenuItem.TABLE:
       remove(statisticsComponent);
+      render(mainInfoContainer, tripInfoView, RenderPosition.AFTERBEGIN);
       tripPresenter.init();
+      addPointButton.removeAttribute('disabled', 'disabled');
+      filterPresenter.init();
       break;
   }
 };
@@ -60,7 +67,7 @@ api.getData()
     appDataModel.setOffers(offers);
     appDataModel.setDestinations(destinations);
     pointsModel.setPoints(UpdateType.INIT, points);
-    render(mainInfoContainer, new TripInfoView(points), RenderPosition.AFTERBEGIN);
+    render(mainInfoContainer, tripInfoView, RenderPosition.AFTERBEGIN);
   })
   .catch((err) => {
     pointsModel.setPoints(UpdateType.INIT, []);

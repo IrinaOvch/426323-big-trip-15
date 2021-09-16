@@ -15,12 +15,13 @@ const createTripInfoTemplate = (points) => {
 };
 
 export default class TripInfo extends AbstractView {
-  constructor(points) {
+  constructor(pointsModel) {
     super();
-    this._points = points;
+
+    this._pointsModel = pointsModel;
   }
 
   getTemplate() {
-    return createTripInfoTemplate(this._points);
+    return createTripInfoTemplate(this._pointsModel.getPoints());
   }
 }
