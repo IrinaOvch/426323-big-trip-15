@@ -1,23 +1,14 @@
 import AbstractView from './abstract.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import {formatDuration} from '../utils/common.js';
 dayjs.extend(duration);
 
 
 const getTimeDifference = (dateFrom, dateTo) => {
   const difference = dayjs(dateTo).diff(dayjs(dateFrom), 'milliseconds');
 
-  if (dayjs.duration(difference).asHours() < 1) {
-    return dayjs.duration(difference).format('mm[M]');
-  }
-
-  if (dayjs.duration(difference).asDays() < 1) {
-    return dayjs.duration(difference).format('HH[H] mm[M]');
-  }
-
-  if (dayjs.duration(difference).asDays() > 1) {
-    return dayjs.duration(difference).format('DD[D] HH[H] mm[M]');
-  }
+  return formatDuration(difference);
 };
 
 const createOfferElement = (offer) => (

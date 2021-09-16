@@ -1,14 +1,16 @@
 import SiteMenuView from './view/site-menu.js';
 import TripInfoView from './view/route-info.js';
-import {render, RenderPosition} from './utils/render.js';
+import {render, RenderPosition, remove} from './utils/render.js';
 import TripPresenter from './presenter/trip.js';
 import PointsModel from './model/points.js';
 import FilterModel from './model/filter.js';
 import FilterPresenter from './presenter/filter.js';
 import Api from './api.js';
 import AppDataModel from './model/app-data.js';
-import { UpdateType } from './const.js';
+import {UpdateType, MenuItem} from './const.js';
+import StatsView from './view/stats.js';
 
+let statisticsComponent = null;
 const AUTHORIZATION = 'Basic flkdsdfsjkllkofsk994';
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 
@@ -18,6 +20,7 @@ const filtersContainer = document.querySelector('.trip-controls__filters');
 const mainContentContainer = document.querySelector('.trip-events');
 
 const api = new Api(END_POINT, AUTHORIZATION);
+const siteMenuComponent = new SiteMenuView();
 
 
 const pointsModel = new PointsModel();
@@ -33,7 +36,24 @@ button.addEventListener('click', (evt) => {
   tripPresenter.createPoint();
 });
 
-render(siteNavigationContainer, new SiteMenuView(), RenderPosition.BEFOREEND);
+const handleSiteMenuClick = (menuItem) => {
+  switch (menuItem) {
+    case MenuItem.STATS:
+      tripPresenter.destroy();
+      statisticsComponent = new StatsView(pointsModel.getPoints());
+      render(mainContentContainer, statisticsComponent, RenderPosition.BEFOREEND);
+      break;
+    case MenuItem.TABLE:
+
+      remove(statisticsComponent);
+      tripPresenter.init();
+      break;
+  }
+};
+
+siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
+
+render(siteNavigationContainer, siteMenuComponent, RenderPosition.BEFOREEND);
 
 api.getData()
   .then((data) => {
@@ -42,6 +62,7 @@ api.getData()
     appDataModel.setDestinations(destinations);
     pointsModel.setPoints(UpdateType.INIT, points);
     render(mainInfoContainer, new TripInfoView(points), RenderPosition.AFTERBEGIN);
+    // render(mainContentContainer, new StatsView(points), RenderPosition.BEFOREEND);
   })
   .catch((err) => {
     pointsModel.setPoints(UpdateType.INIT, []);
@@ -50,3 +71,4 @@ api.getData()
 
 filterPresenter.init();
 tripPresenter.init();
+// render(mainContentContainer, new StatsView(pointsModel.getPoints()), RenderPosition.BEFOREEND);
