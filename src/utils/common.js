@@ -16,4 +16,6 @@ const formatDuration = (difference) => {
   }
 };
 
-export {isEscPressed, formatDuration};
+const capitalizeFirstLetter = (string) =>  string.charAt(0).toUpperCase() + string.slice(1);
+
+export {isEscPressed, formatDuration, capitalizeFirstLetter};

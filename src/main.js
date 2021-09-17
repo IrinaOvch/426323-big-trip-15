@@ -19,6 +19,15 @@ const mainInfoContainer = document.querySelector('.trip-main');
 const filtersContainer = document.querySelector('.trip-controls__filters');
 const mainContentContainer = document.querySelector('.trip-events');
 
+const addPointButton = document.querySelector('.trip-main__event-add-btn');
+const enableAddPointButton = () => {
+  addPointButton.removeAttribute('disabled', 'disabled');
+};
+
+const disableAddPointButton = () => {
+  addPointButton.setAttribute('disabled', 'disabled');
+};
+
 const api = new Api(END_POINT, AUTHORIZATION);
 const siteMenuComponent = new SiteMenuView();
 
@@ -27,14 +36,14 @@ const pointsModel = new PointsModel();
 const filterModel = new FilterModel();
 const appDataModel = new AppDataModel();
 
-const tripPresenter = new TripPresenter(mainContentContainer, pointsModel, filterModel, appDataModel, api);
+const tripPresenter = new TripPresenter(mainContentContainer, pointsModel, filterModel, appDataModel, api, enableAddPointButton);
 const filterPresenter = new FilterPresenter(filtersContainer, filterModel, pointsModel);
 const tripInfoView = new TripInfoView(pointsModel);
 
-const addPointButton = document.querySelector('.trip-main__event-add-btn');
 addPointButton.addEventListener('click', (evt) => {
   evt.preventDefault();
   tripPresenter.createPoint();
+  disableAddPointButton();
 });
 
 const handleSiteMenuClick = (menuItem, currentMenuItem) => {

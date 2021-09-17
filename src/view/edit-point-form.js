@@ -1,12 +1,14 @@
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 import Smart from './smart.js';
+import {POINT_TYPES} from '../utils/trip-point.js';
+import {capitalizeFirstLetter} from '../utils/common.js';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
-  dateFrom: dayjs(),
-  dateTo: dayjs(),
+  dateFrom: new Date() ,
+  dateTo: new Date(),
   destination: {
     name: '',
     description: '',
@@ -37,6 +39,13 @@ const createOffersList = (point, offers) => {
     </div>`).join('');
 };
 
+const createEventTypeItemTemplate = (type, point) => (`<div class="event__type-item">
+  <input id="event-type-${type}-${point.id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${point.type === type ? 'checked' : ''}>
+  <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-${point.id}">${capitalizeFirstLetter(type)}</label>
+</div>`);
+
+const createEventTypeItemTemplates = (types, point) => types.map((type) => createEventTypeItemTemplate(type, point)).join('');
+
 const createEditPointFormTemplate = (point, offers, destinations, destinationNames) => (`<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post"}>
       <header class="event__header">
@@ -50,59 +59,11 @@ const createEditPointFormTemplate = (point, offers, destinations, destinationNam
           <div class="event__type-list">
             <fieldset class="event__type-group" ${point.isDisabled ? 'disabled' : ''}>
               <legend class="visually-hidden">Event type</legend>
-
-              <div class="event__type-item">
-                <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-                <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-                <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-                <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-                <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport">
-                <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-                <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-                <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-                <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-                <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-                <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-              </div>
+              ${createEventTypeItemTemplates(POINT_TYPES, point)}
             </fieldset>
           </div>
         </div>
+
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-1">
@@ -335,13 +296,15 @@ export default class EditPointForm extends Smart {
   _startDateChangeHandler([userDate]) {
     this.updateData({
       dateFrom: userDate,
-    });
+    }, true);
+    this._endDatepicker.set('minDate', userDate);
   }
 
   _endDateChangeHandler([userDate]) {
     this.updateData({
       dateTo: userDate,
-    });
+    }, true);
+    this._startDatepicker.set('maxDate', userDate);
   }
 
   setEditClickHandler(callback) {

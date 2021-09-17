@@ -4,10 +4,11 @@ import {UserAction, UpdateType} from '../const.js';
 import {isEscPressed} from '../utils/common.js';
 
 export default class NewPoint {
-  constructor(pointsListContainer, changeData, appDataModel) {
+  constructor(pointsListContainer, changeData, appDataModel, enableAddPointButton) {
     this._pointsListContainer = pointsListContainer;
     this._changeData = changeData;
     this._appDataModel = appDataModel;
+    this._enableAddPointButton = enableAddPointButton;
 
     this._pointEditComponent = null;
 
@@ -66,16 +67,19 @@ export default class NewPoint {
       UpdateType.MINOR,
       point,
     );
+    this._enableAddPointButton();
   }
 
   _handleDeleteClick() {
     this.destroy();
+    this._enableAddPointButton();
   }
 
   _escKeyDownHandler(evt) {
     if (isEscPressed(evt)) {
       evt.preventDefault();
       this.destroy();
+      this._enableAddPointButton();
     }
   }
 }

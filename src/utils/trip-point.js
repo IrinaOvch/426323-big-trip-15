@@ -1,5 +1,9 @@
 import dayjs from 'dayjs';
 
+const POINT_TYPES = [
+  'taxi', 'bus','train','ship','transport','drive', 'flight', 'check-in', 'sightseeing', 'restaurant',
+];
+
 const sortPointsByDate = (pointA, pointB) => dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
 
 const sortPointsByDuration = (pointA, pointB) => {
@@ -14,4 +18,4 @@ const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) ? true
 
 const isFuture = (date) => date === null ? false : dayjs(date).isAfter(dayjs(), 'D');
 
-export {sortPointsByDate, sortPointsByDuration, sortPointsByPrice, isDatesEqual, isFuture};
+export {sortPointsByDate, sortPointsByDuration, sortPointsByPrice, isDatesEqual, isFuture, POINT_TYPES};
