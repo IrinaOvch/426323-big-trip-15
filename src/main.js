@@ -1,5 +1,4 @@
 import SiteMenuView from './view/site-menu.js';
-import TripInfoView from './view/route-info.js';
 import {render, RenderPosition, remove} from './utils/render.js';
 import TripPresenter from './presenter/trip.js';
 import PointsModel from './model/points.js';
@@ -15,7 +14,7 @@ const AUTHORIZATION = 'Basic flkdsdffsjdfsjofsk994';
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 
 const siteNavigationContainer = document.querySelector('.trip-controls__navigation');
-const mainInfoContainer = document.querySelector('.trip-main');
+
 const filtersContainer = document.querySelector('.trip-controls__filters');
 const mainContentContainer = document.querySelector('.trip-events');
 
@@ -38,7 +37,7 @@ const appDataModel = new AppDataModel();
 
 const tripPresenter = new TripPresenter(mainContentContainer, pointsModel, filterModel, appDataModel, api, enableAddPointButton);
 const filterPresenter = new FilterPresenter(filtersContainer, filterModel, pointsModel);
-const tripInfoView = new TripInfoView(pointsModel);
+
 
 addPointButton.addEventListener('click', (evt) => {
   evt.preventDefault();
@@ -55,7 +54,6 @@ const handleSiteMenuClick = (menuItem, currentMenuItem) => {
       tripPresenter.destroy();
       statisticsComponent = new StatsView(pointsModel.getPoints());
       render(mainContentContainer, statisticsComponent, RenderPosition.BEFOREEND);
-      remove(tripInfoView);
       addPointButton.setAttribute('disabled', 'disabled');
       filterPresenter.init(true);
       break;
@@ -64,7 +62,6 @@ const handleSiteMenuClick = (menuItem, currentMenuItem) => {
         break;
       }
       remove(statisticsComponent);
-      render(mainInfoContainer, tripInfoView, RenderPosition.AFTERBEGIN);
       tripPresenter.init();
       addPointButton.removeAttribute('disabled', 'disabled');
       filterPresenter.init();
@@ -82,7 +79,6 @@ api.getData()
     appDataModel.setOffers(offers);
     appDataModel.setDestinations(destinations);
     pointsModel.setPoints(UpdateType.INIT, points);
-    render(mainInfoContainer, tripInfoView, RenderPosition.AFTERBEGIN);
   })
   .catch((err) => {
     pointsModel.setPoints(UpdateType.INIT, []);
