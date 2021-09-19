@@ -54,7 +54,7 @@ const handleSiteMenuClick = (menuItem, currentMenuItem) => {
       tripPresenter.destroy();
       statisticsComponent = new StatsView(pointsModel.getPoints());
       render(mainContentContainer, statisticsComponent, RenderPosition.BEFOREEND);
-      addPointButton.setAttribute('disabled', 'disabled');
+      disableAddPointButton();
       filterPresenter.init(true);
       break;
     case MenuItem.TABLE:
@@ -63,7 +63,7 @@ const handleSiteMenuClick = (menuItem, currentMenuItem) => {
       }
       remove(statisticsComponent);
       tripPresenter.init();
-      addPointButton.removeAttribute('disabled', 'disabled');
+      enableAddPointButton();
       filterPresenter.init();
       break;
   }

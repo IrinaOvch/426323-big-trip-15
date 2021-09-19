@@ -8,7 +8,6 @@ const countPointsByTypes = (points, type) => points.filter((point) => point.type
 
 const countPointsByTime = (points, type) => points.filter((point) => point.type === type).reduce(((acc, currentVal) =>
 {
-
   const difference = dayjs(currentVal.dateTo).diff(dayjs(currentVal.dateFrom), 'milliseconds');
   return acc + difference;
 }

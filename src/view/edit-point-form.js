@@ -146,6 +146,21 @@ export default class EditPointForm extends Smart {
     this._setDatepicker();
   }
 
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  }
+
+  setEditClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
+  }
+
   removeElement() {
     super.removeElement();
 
@@ -168,9 +183,8 @@ export default class EditPointForm extends Smart {
     this._setDatepicker();
   }
 
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  getTemplate() {
+    return createEditPointFormTemplate(this._point, this._offersData, this._destinationsData, this._destinationNames);
   }
 
   _formSubmitHandler(evt) {
@@ -224,8 +238,6 @@ export default class EditPointForm extends Smart {
   }
 
   _pointDestinationInputHandler(evt) {
-
-
     if (this._destinationNames.includes(evt.target.value) || evt.target.value === '') {
       const chosenDestination = this._destinationsData.find((destination) => destination.name === evt.target.value);
       this.updateData({
@@ -237,7 +249,6 @@ export default class EditPointForm extends Smart {
       });
     }
     const destinationInput = this.getElement().querySelector('.event__input--destination');
-
     const val = evt.target.value;
     destinationInput.value = '';
     destinationInput.focus();
@@ -307,22 +318,8 @@ export default class EditPointForm extends Smart {
     this._startDatepicker.set('maxDate', userDate);
   }
 
-  setEditClickHandler(callback) {
-    this._callback.editClick = callback;
-    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
-  }
-
   _formDeleteClickHandler(evt) {
     evt.preventDefault();
     this._callback.deleteClick(this._point);
-  }
-
-  setDeleteClickHandler(callback) {
-    this._callback.deleteClick = callback;
-    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
-  }
-
-  getTemplate() {
-    return createEditPointFormTemplate(this._point, this._offersData, this._destinationsData, this._destinationNames);
   }
 }

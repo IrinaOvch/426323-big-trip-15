@@ -20,7 +20,7 @@ export default class Trip {
     this._enableAddPointButton = enableAddPointButton;
 
 
-    this._tripPointPresenter = new Map();
+    this._tripPointPresenters = new Map();
     this._filterType = FilterType.ALL;
     this._currentSortType = SortType.DEFAULT;
     this._isLoading = true;
@@ -83,7 +83,7 @@ export default class Trip {
   }
 
   _handleModeChange() {
-    this._tripPointPresenter.forEach((presenter) => presenter.resetView());
+    this._tripPointPresenters.forEach((presenter) => presenter.resetView());
     this._newPointPresenter.destroy();
   }
 
@@ -98,13 +98,13 @@ export default class Trip {
   }
 
   _renderPoint(point) {
-    const tripPointPresenter = new TripPointPresenter(this._pointsListComponent, this._handleViewAction, this._handleModeChange, this._appDataModel);
+    const tripPointPresenter = new TripPointPresenter(this._pointsListComponent, this._handleViewAction, this._handleModeChange, this._appDataModel, this._enableAddPointButton);
     tripPointPresenter.init(point);
-    this._tripPointPresenter.set(point.id, tripPointPresenter);
+    this._tripPointPresenters.set(point.id, tripPointPresenter);
   }
 
   _renderPoints(points) {
-    points.forEach((_, i) => this._renderPoint(points[i]));
+    points.forEach((point) => this._renderPoint(point));
   }
 
   _renderNoPoints() {
@@ -117,14 +117,14 @@ export default class Trip {
   }
 
   _clearPointsList() {
-    this._tripPointPresenter.forEach((presenter) => presenter.destroy());
-    this._tripPointPresenter.clear();
+    this._tripPointPresenters.forEach((presenter) => presenter.destroy());
+    this._tripPointPresenters.clear();
   }
 
   _clearTrip({resetSortType = false} = {}) {
     this._newPointPresenter.destroy();
-    this._tripPointPresenter.forEach((presenter) => presenter.destroy());
-    this._tripPointPresenter.clear();
+    this._tripPointPresenters.forEach((presenter) => presenter.destroy());
+    this._tripPointPresenters.clear();
 
     remove(this._sortComponent);
     remove(this._loadingComponent);
@@ -141,13 +141,13 @@ export default class Trip {
   _handleViewAction(actionType, updateType, update) {
     switch(actionType) {
       case UserAction.UPDATE_POINT:
-        this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.SAVING);
+        this._tripPointPresenters.get(update.id).setViewState(PointPresenterViewState.SAVING);
         this._api.updatePoint(update)
           .then((response) => {
             this._pointsModel.updatePoint(updateType, response);
           })
           .catch(() => {
-            this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.ABORTING);
+            this._tripPointPresenters.get(update.id).setViewState(PointPresenterViewState.ABORTING);
           });
         break;
       case UserAction.ADD_POINT:
@@ -161,13 +161,13 @@ export default class Trip {
           });
         break;
       case UserAction.DELETE_POINT:
-        this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.DELETING);
+        this._tripPointPresenters.get(update.id).setViewState(PointPresenterViewState.DELETING);
         this._api.deletePoint(update)
           .then(() => {
             this._pointsModel.deletePoint(updateType, update);
           })
           .catch(() => {
-            this._tripPointPresenter.get(update.id).setViewState(PointPresenterViewState.ABORTING);
+            this._tripPointPresenters.get(update.id).setViewState(PointPresenterViewState.ABORTING);
           });
         break;
     }
@@ -176,7 +176,7 @@ export default class Trip {
   _handleModelEvent(updateType, data) {
     switch(updateType) {
       case UpdateType.PATCH:
-        this._tripPointPresenter.get(data.id).init(data);
+        this._tripPointPresenters.get(data.id).init(data);
 
         break;
       case UpdateType.MINOR:
@@ -215,10 +215,13 @@ export default class Trip {
     if (points.length > 0) {
       this._renderSort();
       this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
-      render(this._mainContentContainer, this._pointsListComponent, RenderPosition.BEFOREEND);
+    }
+
+    render(this._mainContentContainer, this._pointsListComponent, RenderPosition.BEFOREEND);
+
+    if (points.length > 0) {
       this._renderPoints(points);
     } else {
-      render(this._mainContentContainer, this._pointsListComponent, RenderPosition.BEFOREEND);
       this._renderNoPoints();
     }
   }

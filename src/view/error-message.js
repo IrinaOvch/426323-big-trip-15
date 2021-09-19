@@ -2,8 +2,6 @@ import AbstractView from './abstract.js';
 
 const createErrorMessageTemplate = (err) => {
   const errorMessage = `<p class="trip-events__error">${err}. Please reload the page</p>`;
-
-
   return errorMessage;
 };
 

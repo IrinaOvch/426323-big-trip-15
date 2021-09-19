@@ -38,6 +38,11 @@ export default class SiteSorting extends AbstractView {
     this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
   }
 
+  setSortTypeChangeHandler(callback) {
+    this._callback.sortTypeChange = callback;
+    this.getElement().addEventListener('click', this._sortTypeChangeHandler);
+  }
+
   getTemplate() {
     return createSortingTemplate(this._currentSortType);
   }
@@ -48,10 +53,5 @@ export default class SiteSorting extends AbstractView {
     }
 
     this._callback.sortTypeChange(evt.target.dataset.sortType);
-  }
-
-  setSortTypeChangeHandler(callback) {
-    this._callback.sortTypeChange = callback;
-    this.getElement().addEventListener('click', this._sortTypeChangeHandler);
   }
 }

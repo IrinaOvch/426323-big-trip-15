@@ -31,17 +31,6 @@ export default class NewPoint {
     document.addEventListener('keydown', this._escKeyDownHandler);
   }
 
-  destroy() {
-    if (this._pointEditComponent === null) {
-      return;
-    }
-
-    remove(this._pointEditComponent);
-    this._pointEditComponent = null;
-
-    document.removeEventListener('keydown', this._escKeyDownHandler);
-  }
-
   setSaving() {
     this._pointEditComponent.updateData({
       isDisabled: true,
@@ -61,7 +50,19 @@ export default class NewPoint {
     this._pointEditComponent.shake(resetFormState);
   }
 
+  destroy() {
+    if (this._pointEditComponent === null) {
+      return;
+    }
+
+    remove(this._pointEditComponent);
+    this._pointEditComponent = null;
+
+    document.removeEventListener('keydown', this._escKeyDownHandler);
+  }
+
   _handleFormSubmit(point) {
+    delete point.isBlank;
     this._changeData(
       UserAction.ADD_POINT,
       UpdateType.MINOR,

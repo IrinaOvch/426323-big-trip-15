@@ -17,14 +17,15 @@ const State = {
 };
 
 export default class TripPoint {
-  constructor(pointsListContainer, changeData, changeMode, appDataModel) {
+  constructor(pointsListContainer, changeData, changeMode, appDataModel, enableAddPointButton) {
     this._pointsListContainer = pointsListContainer;
     this._changeData = changeData;
     this._changeMode = changeMode;
     this._appDataModel = appDataModel;
+    this._enableAddPointButton = enableAddPointButton;
 
     this._tripPointComponent = null;
-    this._EditTripPointComponent = null;
+    this._editTripPointComponent = null;
     this._mode = Mode.DEFAULT;
 
     this._handleEditClick = this._handleEditClick.bind(this);
@@ -39,16 +40,16 @@ export default class TripPoint {
     this._point = point;
 
     const prevTripPointComponent = this._tripPointComponent;
-    const prevEditTripPointComponent = this._EditTripPointComponent;
+    const prevEditTripPointComponent = this._editTripPointComponent;
 
     this._tripPointComponent = new TripPointView(this._point);
-    this._EditTripPointComponent = new EditPointFormView(this._appDataModel, this._point);
+    this._editTripPointComponent = new EditPointFormView(this._appDataModel, this._point);
 
     this._tripPointComponent.setEditClickHandler(this._handleEditClick);
     this._tripPointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
-    this._EditTripPointComponent.setEditClickHandler(this._handleMinimizeClick);
-    this._EditTripPointComponent.setFormSubmitHandler(this._handleFormSubmit);
-    this._EditTripPointComponent.setDeleteClickHandler(this._handleDeleteClick);
+    this._editTripPointComponent.setEditClickHandler(this._handleMinimizeClick);
+    this._editTripPointComponent.setFormSubmitHandler(this._handleFormSubmit);
+    this._editTripPointComponent.setDeleteClickHandler(this._handleDeleteClick);
 
     if (prevTripPointComponent === null || prevEditTripPointComponent === null) {
       render(this._pointsListContainer, this._tripPointComponent, RenderPosition.BEFOREEND);
@@ -70,7 +71,7 @@ export default class TripPoint {
 
   destroy() {
     remove(this._tripPointComponent);
-    remove(this._EditTripPointComponent);
+    remove(this._editTripPointComponent);
   }
 
   resetView() {
@@ -85,7 +86,7 @@ export default class TripPoint {
     }
 
     const resetFormState = () => {
-      this._EditTripPointComponent.updateData({
+      this._editTripPointComponent.updateData({
         isDisabled: false,
         isSaving: false,
         isDeleting: false,
@@ -94,33 +95,33 @@ export default class TripPoint {
 
     switch (state) {
       case State.SAVING:
-        this._EditTripPointComponent.updateData({
+        this._editTripPointComponent.updateData({
           isDisabled: true,
           isSaving: true,
         });
         break;
       case State.DELETING:
-        this._EditTripPointComponent.updateData({
+        this._editTripPointComponent.updateData({
           isDisabled: true,
           isDeleting: true,
         });
         break;
       case State.ABORTING:
         this._tripPointComponent.shake(resetFormState);
-        this._EditTripPointComponent.shake(resetFormState);
+        this._editTripPointComponent.shake(resetFormState);
         break;
     }
   }
 
   _replaceCardToForm() {
-    replace(this._EditTripPointComponent, this._tripPointComponent);
+    replace(this._editTripPointComponent, this._tripPointComponent);
     document.addEventListener('keydown', this._escKeyDownHandler);
     this._changeMode();
     this._mode = Mode.EDITING;
   }
 
   _replaceFormToCard() {
-    replace(this._tripPointComponent, this._EditTripPointComponent);
+    replace(this._tripPointComponent, this._editTripPointComponent);
     document.removeEventListener('keydown', this._escKeyDownHandler);
     this._mode = Mode.DEFAULT;
   }
@@ -135,10 +136,12 @@ export default class TripPoint {
 
   _handleEditClick() {
     this._replaceCardToForm();
+    this._enableAddPointButton();
   }
 
   _handleMinimizeClick() {
     this._replaceFormToCard();
+
   }
 
   _handleFavoriteClick() {
